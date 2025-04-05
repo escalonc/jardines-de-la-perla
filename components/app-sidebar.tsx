@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         name: "Visitas",
-        url: "#",
+        url: "dashboard/visits",
         icon: Users,
         role: "resident",
       },
