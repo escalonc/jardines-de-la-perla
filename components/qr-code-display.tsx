@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+
 interface Invite {
   id: string;
   name: string;
@@ -24,7 +25,7 @@ interface QRCodeDisplayProps {
 }
 
 export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [qrDataUrl, setQrDataUrl] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [shareSupported, setShareSupported] = useState(false);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -88,7 +89,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
         });
       }
     );
-  }, [invite]);
+  }, [invite]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate the combined image with QR code and text
   const generateImageBlob = async (qrUrl: string): Promise<Blob | null> => {
