@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jardines de la Perla",
+  title: "Jardines de La Perla",
   description: "Desarrollo de Jardines de La Perla",
 };
 
