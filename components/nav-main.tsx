@@ -1,9 +1,6 @@
-"use client"
+"use client";
 
-import {
-  MoreHorizontal,
-  type LucideIcon,
-} from "lucide-react"
+import { MoreHorizontal, type LucideIcon } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -11,18 +8,19 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { checkRole, getUserRole } from "@/app/utils/roles";
 
-export function NavMain({
+export async function NavMain({
   items,
 }: {
   items: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
+    name: string;
+    url: string;
+    icon: LucideIcon;
+    role: Roles;
+  }[];
 }) {
-
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
@@ -39,5 +37,5 @@ export function NavMain({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
