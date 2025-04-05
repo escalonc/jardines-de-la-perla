@@ -4,58 +4,65 @@ import * as React from "react";
 import { ShieldUser, House, Users, Squircle, LucideProps } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-// import { NavUser } from "@/components/nav-user";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
-  // SidebarFooter,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-const data: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  navMain: {
-    name: string;
-    url: string;
-    icon: React.ComponentType<LucideProps>;
-    role: Roles;
-  }[];
-} = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      name: "Residentes",
-      url: "#",
-      icon: House,
-      role: "admin",
-    },
-    {
-      name: "Visitas",
-      url: "#",
-      icon: Users,
-      role: "resident",
-    },
-    {
-      name: "Seguridad",
-      url: "#",
-      icon: ShieldUser,
-      role: "watchman",
-    },
-  ],
-};
+import { useUser } from "@clerk/nextjs";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+
+  const userEmail = user?.primaryEmailAddress?.emailAddress ?? "";
+  const userName = user?.fullName ?? "";
+  const userImage = user?.imageUrl ?? "";
+
+  const data: {
+    user: {
+      name: string;
+      email: string;
+      avatar: string;
+    };
+    navMain: {
+      name: string;
+      url: string;
+      icon: React.ComponentType<LucideProps>;
+      role: Roles;
+    }[];
+  } = {
+    user: {
+      name: userName,
+      email: userEmail,
+      avatar: userImage,
+    },
+    navMain: [
+      {
+        name: "Residentes",
+        url: "#",
+        icon: House,
+        role: "admin",
+      },
+      {
+        name: "Visitas",
+        url: "#",
+        icon: Users,
+        role: "resident",
+      },
+      {
+        name: "Seguridad",
+        url: "#",
+        icon: ShieldUser,
+        role: "watchman",
+      },
+    ],
+  };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -80,9 +87,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
-      {/* <SidebarFooter>
+      <SidebarFooter>
         <NavUser user={data.user} />
-      </SidebarFooter> */}
+      </SidebarFooter>
     </Sidebar>
   );
 }
