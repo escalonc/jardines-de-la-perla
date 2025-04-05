@@ -7,5 +7,5 @@ export const checkRole = async (role: Roles) => {
 
 export const getUserRole = async () => {
     const { sessionClaims } = await auth()
-    return sessionClaims?.metadata.role;
+    return sessionClaims?.metadata.role ?? "not-assigned";
 }

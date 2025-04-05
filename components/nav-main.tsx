@@ -9,9 +9,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { checkRole, getUserRole } from "@/app/utils/roles";
+import { useRole } from "@/app/context/role-context";
 
-export async function NavMain({
+export function NavMain({
   items,
 }: {
   items: {
@@ -21,20 +21,24 @@ export async function NavMain({
     role: Roles;
   }[];
 }) {
+  const { role } = useRole();
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+        {items
+          .filter((item) => role === "admin" || item.role === role)
+          .map((item) => (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton asChild>
+                <a href={item.url}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
       </SidebarMenu>
     </SidebarGroup>
   );
