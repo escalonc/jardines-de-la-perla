@@ -21,7 +21,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? "";
   const userName = user?.fullName ?? "";
-  const userImage = user?.imageUrl ?? null;
+  const userImage = user?.imageUrl ?? "";
 
   const data: {
     user: {
