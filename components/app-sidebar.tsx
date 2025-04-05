@@ -1,14 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  ShieldUser,
-  House,
-  Users,
-} from "lucide-react"
+import * as React from "react";
+import { ShieldUser, House, Users, Squircle } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +13,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-const data = {
+const data: {
+  user: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  navMain: {
+    name: string;
+    url: string;
+    icon: any;
+    role: Roles;
+  }[];
+} = {
   user: {
     name: "shadcn",
     email: "m@example.com",
@@ -30,16 +38,27 @@ const data = {
       name: "Residentes",
       url: "#",
       icon: House,
+      role: "admin",
     },
     {
       name: "Visitas",
       url: "#",
       icon: Users,
-    }
+      role: "resident",
+    },
+    {
+      name: "Seguridad",
+      url: "#",
+      icon: ShieldUser,
+      role: "watchman",
+    },
   ],
-}
+};
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  role,
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -48,10 +67,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <ShieldUser className="size-6" />
+                  <Squircle className="size-6" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Jardines de la Perla</span>
+                  <span className="truncate font-medium">
+                    Jardines de La Perla
+                  </span>
                   <span className="truncate text-xs">v0.0.1</span>
                 </div>
               </a>
@@ -62,9 +83,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <NavUser user={data.user} />
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
-  )
+  );
 }

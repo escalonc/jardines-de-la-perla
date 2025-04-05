@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
+import { esMX } from "@clerk/localizations";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Jardines de la Perla",
-  description: "Desarrollo de Jardines de la Perla",
+  description: "Desarrollo de Jardines de La Perla",
 };
 
 export default function RootLayout({
@@ -23,12 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider localization={esMX}>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
