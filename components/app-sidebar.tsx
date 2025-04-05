@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { ShieldUser, House, Users, Squircle } from "lucide-react";
+import { ShieldUser, House, Users, Squircle, LucideProps } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+// import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  // SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -24,7 +24,7 @@ const data: {
   navMain: {
     name: string;
     url: string;
-    icon: any;
+    icon: React.ComponentType<LucideProps>;
     role: Roles;
   }[];
 } = {
@@ -55,10 +55,7 @@ const data: {
   ],
 };
 
-export function AppSidebar({
-  role,
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>

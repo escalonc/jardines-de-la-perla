@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import { LucideProps } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -17,7 +17,7 @@ export function NavMain({
   items: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    icon: React.ComponentType<LucideProps>;
     role: Roles;
   }[];
 }) {
