@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRCodeDisplay } from "@/components/qr-code-display";
 import { generateUniqueId } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Fixed values as per requirements
 const FIXED_TITLE = "Jardines de La Perla";
@@ -29,6 +30,7 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
   const [name, setName] = useState("");
   const [guests, setGuests] = useState(0);
   const [generatedInvite, setGeneratedInvite] = useState<Invite | null>(null);
+  const isMobile = useIsMobile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +59,98 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
     }
   };
 
+  // Mobile-optimized layout that shows form and QR side by side
+  if (isMobile) {
+    return (
+      <div>
+        {/* Mobile layout - QR code appears next to form */}
+        <div className="flex flex-col space-y-4">
+          {/* Form and QR in a single card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Create New Invite</CardTitle>
+              <CardDescription className="text-xs">
+                for {FIXED_TITLE}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-3">
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Form section */}
+                <div className="flex-1">
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="name" className="text-sm">
+                        Invitee Name
+                      </Label>
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter name"
+                        required
+                        className="h-8 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="visits" className="text-sm">
+                        Visits
+                      </Label>
+                      <Input
+                        id="visits"
+                        type="number"
+                        min="1"
+                        value={guests}
+                        onChange={(e) => setGuests(parseInt(e.target.value))}
+                        required
+                        className="h-8 text-sm"
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full h-8 text-sm">
+                      {generatedInvite ? "Update" : "Generate QR"}
+                    </Button>
+                  </form>
+                </div>
+
+                {/* QR code section */}
+                <div className="flex-1 flex items-center justify-center">
+                  {generatedInvite ? (
+                    <div className="w-full">
+                      <QRCodeDisplay invite={generatedInvite} compact={true} />
+                      <div className="flex justify-between mt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setGeneratedInvite(null)}
+                          className="text-xs h-7 px-2"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleSave}
+                          className="text-xs h-7 px-2"
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-[140px] border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/20">
+                      <p className="text-xs text-muted-foreground text-center px-2">
+                        QR code will appear here
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout (unchanged)
   return (
     <div className="grid gap-6 md:grid-cols-2 auto-rows-fr">
       {/* Form Card - Fixed height */}
@@ -71,22 +165,24 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
           <form onSubmit={handleSubmit} className="h-full flex flex-col">
             <div className="space-y-4 flex-grow">
               <div className="space-y-2">
-                <Label htmlFor="name">Nombre de la persona invitada</Label>
+                <Label htmlFor="name-desktop">
+                  Nombre de la persona invitada
+                </Label>
                 <Input
-                  id="name"
+                  id="name-desktop"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ingrese el nombre de la persona invitada"
+                  placeholder="Ingrese el nombre"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="guests">
+                <Label htmlFor="guests-desktop">
                   Número de acompañantes permitidos
                 </Label>
                 <Input
-                  id="guests"
+                  id="guests-desktop"
                   type="number"
                   min={0}
                   max={10}
@@ -106,7 +202,7 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
         </CardContent>
       </Card>
 
-      {/* QR Code Card - Same fixed height */}
+      {/* QR Code Card */}
       <Card className="h-[650px] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <CardTitle>
