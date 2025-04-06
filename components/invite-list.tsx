@@ -12,15 +12,6 @@ import { QRCodeDisplay } from "@/components/qr-code-display";
 import { formatDistanceToNow } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 
-interface Invite {
-  id: string;
-  name: string;
-  visits: number;
-  title: string;
-  description: string;
-  createdAt: string;
-}
-
 interface InviteListProps {
   invites: Invite[];
   onDelete: (id: string) => void;

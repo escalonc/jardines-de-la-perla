@@ -12,14 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-interface Invite {
-  id: string;
-  name: string;
-  visits: number;
-  title: string;
-  description: string;
-}
-
 interface QRCodeDisplayProps {
   invite: Invite;
 }
@@ -47,7 +39,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
     const qrData = JSON.stringify({
       id: invite.id,
       name: invite.name,
-      visits: invite.visits,
+      guests: invite.guests,
     });
 
     // Generate QR code on canvas
@@ -119,10 +111,10 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
 
       // Add invitee name
       ctx.font = "16px Arial";
-      ctx.fillText(`For: ${invite.name}`, canvas.width / 2, 70);
+      ctx.fillText(`Para: ${invite.name}`, canvas.width / 2, 70);
 
-      // Add visits
-      ctx.fillText(`Visits: ${invite.visits}`, canvas.width / 2, 100);
+      // Add guests
+      ctx.fillText(`Acompañantes: ${invite.guests}`, canvas.width / 2, 100);
 
       // Draw QR code
       const qrImage = new Image();
@@ -140,7 +132,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
       // Add description (now fixed as "invite code")
       ctx.font = "14px Arial";
       ctx.fillStyle = "#4b5563";
-      ctx.fillText(invite.description, canvas.width / 2, 380); // Adjusted position
+      ctx.fillText(invite.description || "", canvas.width / 2, 380); // Adjusted position
 
       // Convert to blob
       return new Promise<Blob>((resolve, reject) => {
@@ -229,7 +221,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
 
   // Copy the invite details to clipboard
   const copyToClipboard = async () => {
-    const text = `Invite for: ${invite.name}\nTitle: ${invite.title}\nVisits: ${invite.visits}\nDetails: ${invite.description}`;
+    const text = `Invitación para: ${invite.name}\nTitle: ${invite.title}\nguests: ${invite.guests}\nDetails: ${invite.description}`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -252,8 +244,10 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
     >
       <div className="text-center">
         <h3 className="font-bold text-lg">{invite.title}</h3>
-        <p className="text-sm text-muted-foreground">For: {invite.name}</p>
-        <p className="text-xs text-muted-foreground">Visits: {invite.visits}</p>
+        <p className="text-sm text-muted-foreground">Para: {invite.name}</p>
+        <p className="text-xs text-muted-foreground">
+          Acompañantes: {invite.guests}
+        </p>
       </div>
 
       <div className="bg-white p-2 rounded-md">
@@ -269,7 +263,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
         <DropdownMenuTrigger asChild>
           <Button className="w-full">
             <Share className="w-4 h-4 mr-2" />
-            Share Invite
+            Compartir
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center">
