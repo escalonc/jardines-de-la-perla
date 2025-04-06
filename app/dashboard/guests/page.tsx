@@ -6,15 +6,6 @@ import { InviteList } from "@/components/invite-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-interface Invite {
-  id: string;
-  name: string;
-  visits: number;
-  title: string;
-  description: string;
-  createdAt: string;
-}
-
 export default function Home() {
   const [invites, setInvites] = useState<Invite[]>([]);
 
@@ -39,14 +30,14 @@ export default function Home() {
   return (
     <main className="container mx-auto p-4 max-w-4xl">
       <h1 className="text-3xl font-bold text-center my-6">
-        Jardines de La Perla
+        Registro de invitados
       </h1>
 
       <Tabs defaultValue="create" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="create">Crear Invitación</TabsTrigger>
+          <TabsTrigger value="create">Crear invitación</TabsTrigger>
           <TabsTrigger value="active">
-            Invitaciones Activas ({invites.length})
+            Invitaciones activas ({invites.length})
           </TabsTrigger>
         </TabsList>
         <TabsContent value="create" className="mt-6">

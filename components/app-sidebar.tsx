@@ -49,8 +49,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         role: "admin",
       },
       {
-        name: "Visitas",
-        url: "/dashboard/visits",
+        name: "Invitados",
+        url: "/dashboard/guests",
         icon: Users,
         role: "resident",
       },

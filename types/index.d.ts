@@ -1,7 +1,7 @@
 interface Invite {
   id: string
   name: string
-  visits: number
+  guests: number
   title: string
   description?: string
   createdAt: string

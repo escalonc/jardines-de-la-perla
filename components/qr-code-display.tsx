@@ -11,25 +11,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-
-interface Invite {
-  id: string;
-  name: string;
-  visits: number;
-  title: string;
-  description: string;
-}
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface QRCodeDisplayProps {
   invite: Invite;
+  compact?: boolean;
 }
 
-export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
+export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [shareSupported, setShareSupported] = useState(false);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Check if Web Share API is supported
   useEffect(() => {
@@ -47,8 +42,11 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
     const qrData = JSON.stringify({
       id: invite.id,
       name: invite.name,
-      visits: invite.visits,
+      guests: invite.guests,
     });
+
+    // Determine QR code size based on compact mode and device
+    const qrSize = compact ? 120 : isMobile ? 150 : 200;
 
     // Generate QR code on canvas
     if (canvasRef.current) {
@@ -56,7 +54,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
         canvasRef.current,
         qrData,
         {
-          width: 200, // Increased QR code size
+          width: qrSize,
           margin: 1,
           color: {
             dark: "#000000",
@@ -73,7 +71,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
     QRCode.toDataURL(
       qrData,
       {
-        width: 200, // Increased QR code size
+        width: 200, // Keep this larger for sharing
         margin: 1,
       },
       (err, url) => {
@@ -89,7 +87,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
         });
       }
     );
-  }, [invite]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [invite, isMobile, compact]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate the combined image with QR code and text
   const generateImageBlob = async (qrUrl: string): Promise<Blob | null> => {
@@ -119,10 +117,10 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
 
       // Add invitee name
       ctx.font = "16px Arial";
-      ctx.fillText(`For: ${invite.name}`, canvas.width / 2, 70);
+      ctx.fillText(`Para: ${invite.name}`, canvas.width / 2, 70);
 
-      // Add visits
-      ctx.fillText(`Visits: ${invite.visits}`, canvas.width / 2, 100);
+      // Add guests
+      ctx.fillText(`Acompañantes: ${invite.guests}`, canvas.width / 2, 100);
 
       // Draw QR code
       const qrImage = new Image();
@@ -140,7 +138,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
       // Add description (now fixed as "invite code")
       ctx.font = "14px Arial";
       ctx.fillStyle = "#4b5563";
-      ctx.fillText(invite.description, canvas.width / 2, 380); // Adjusted position
+      ctx.fillText(invite.description || "", canvas.width / 2, 380); // Adjusted position
 
       // Convert to blob
       return new Promise<Blob>((resolve, reject) => {
@@ -229,7 +227,7 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
 
   // Copy the invite details to clipboard
   const copyToClipboard = async () => {
-    const text = `Invite for: ${invite.name}\nTitle: ${invite.title}\nVisits: ${invite.visits}\nDetails: ${invite.description}`;
+    const text = `Invitación para: ${invite.name}\nTitle: ${invite.title}\nguests: ${invite.guests}\nDetails: ${invite.description}`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -245,18 +243,52 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
     }
   };
 
+  // For compact mode (used in mobile side-by-side view)
+  if (compact) {
+    return (
+      <div
+        ref={containerRef}
+        className="flex flex-col items-center space-y-1 p-2 border rounded-lg w-full bg-white"
+      >
+        <div className="text-center">
+          <p className="text-xs font-medium">For: {invite.name}</p>
+          <p className="text-xs text-muted-foreground">
+            Acompañantes: {invite.guests}
+          </p>
+        </div>
+
+        <div className="bg-white rounded-md">
+          <canvas ref={canvasRef} />
+        </div>
+
+        <Button
+          onClick={shareSupported ? handleShare : downloadImage}
+          className="w-full h-7 text-xs"
+        >
+          <Share className="w-3 h-3 mr-1" />
+          {shareSupported ? "Share" : "Download"}
+        </Button>
+      </div>
+    );
+  }
+
+  // Standard display for desktop and non-compact views
   return (
     <div
       ref={containerRef}
-      className="flex flex-col items-center space-y-4 p-4 border rounded-lg w-full max-w-xs mx-auto bg-white"
+      className="flex flex-col items-center space-y-2 md:space-y-4 p-3 md:p-4 border rounded-lg w-full max-w-xs mx-auto bg-white"
     >
       <div className="text-center">
-        <h3 className="font-bold text-lg">{invite.title}</h3>
-        <p className="text-sm text-muted-foreground">For: {invite.name}</p>
-        <p className="text-xs text-muted-foreground">Visits: {invite.visits}</p>
+        <h3 className="font-bold text-base md:text-lg">{invite.title}</h3>
+        <p className="text-xs md:text-sm text-muted-foreground">
+          Para: {invite.name}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Acompañantes: {invite.guests}
+        </p>
       </div>
 
-      <div className="bg-white p-2 rounded-md">
+      <div className="bg-white p-1 md:p-2 rounded-md">
         <canvas ref={canvasRef} />
       </div>
 
@@ -267,9 +299,9 @@ export function QRCodeDisplay({ invite }: QRCodeDisplayProps) {
       {/* Dropdown menu for sharing options */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="w-full">
-            <Share className="w-4 h-4 mr-2" />
-            Share Invite
+          <Button className="w-full text-xs md:text-sm py-1 md:py-2 h-8 md:h-10">
+            <Share className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+            Compartir
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center">
