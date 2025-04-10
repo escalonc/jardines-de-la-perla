@@ -1,11 +1,11 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from "@clerk/nextjs/server";
 
 export const checkRole = async (role: Roles) => {
-    const { sessionClaims } = await auth()
-    return sessionClaims?.metadata.role === role
-}
+  const { sessionClaims } = await auth();
+  return sessionClaims?.metadata.role === role;
+};
 
 export const getUserRole = async () => {
-    const { sessionClaims } = await auth()
-    return sessionClaims?.metadata.role ?? "not-assigned";
-}
+  const { sessionClaims } = await auth();
+  return sessionClaims?.metadata.role ?? "not-assigned";
+};

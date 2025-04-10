@@ -65,7 +65,7 @@ export function QRCodeDisplay({
         },
         (error) => {
           if (error) console.error(error);
-        }
+        },
       );
     }
 
@@ -90,7 +90,7 @@ export function QRCodeDisplay({
             onImageBlobGenerated?.(blob);
           }
         });
-      }
+      },
     );
   }, [invite, isMobile, compact]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -163,16 +163,16 @@ export function QRCodeDisplay({
     return (
       <div
         ref={containerRef}
-        className="flex flex-col items-center space-y-1 p-2 border rounded-lg w-full bg-white"
+        className="flex w-full flex-col items-center space-y-1 rounded-lg border bg-white p-2"
       >
         <div className="text-center">
           <p className="text-xs font-medium">For: {invite.name}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Acompañantes: {invite.guests}
           </p>
         </div>
 
-        <div className="bg-white rounded-md">
+        <div className="rounded-md bg-white">
           <canvas ref={canvasRef} />
         </div>
 
@@ -191,23 +191,23 @@ export function QRCodeDisplay({
   return (
     <div
       ref={containerRef}
-      className="flex flex-col items-center space-y-2 md:space-y-4 p-3 md:p-4 border rounded-lg w-full max-w-xs mx-auto bg-white"
+      className="mx-auto flex w-full max-w-xs flex-col items-center space-y-2 rounded-lg border bg-white p-3 md:space-y-4 md:p-4"
     >
       <div className="text-center">
-        <h3 className="font-bold text-base md:text-lg">{invite.title}</h3>
-        <p className="text-xs md:text-sm text-muted-foreground">
+        <h3 className="text-base font-bold md:text-lg">{invite.title}</h3>
+        <p className="text-muted-foreground text-xs md:text-sm">
           Para: {invite.name}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Acompañantes: {invite.guests}
         </p>
       </div>
 
-      <div className="bg-white p-1 md:p-2 rounded-md">
+      <div className="rounded-md bg-white p-1 md:p-2">
         <canvas ref={canvasRef} />
       </div>
 
-      <p className="text-xs text-center text-muted-foreground">
+      <p className="text-muted-foreground text-center text-xs">
         {invite.description}
       </p>
     </div>

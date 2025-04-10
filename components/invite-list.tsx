@@ -20,7 +20,7 @@ interface InviteListProps {
 export function InviteList({ invites, onDelete }: InviteListProps) {
   if (invites.length === 0) {
     return (
-      <div className="text-center p-8">
+      <div className="p-8 text-center">
         <h3 className="text-lg font-medium">No active invites</h3>
         <p className="text-muted-foreground">Create an invite to get started</p>
       </div>
@@ -32,7 +32,7 @@ export function InviteList({ invites, onDelete }: InviteListProps) {
       {invites.map((invite) => (
         <Card key={invite.id}>
           <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
+            <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="truncate">{invite.title}</CardTitle>
                 <CardDescription>
@@ -42,7 +42,7 @@ export function InviteList({ invites, onDelete }: InviteListProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                 onClick={() => onDelete(invite.id)}
                 title="Delete invite"
               >

@@ -182,16 +182,16 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
 
   // Desktop layout (unchanged)
   return (
-    <div className="grid gap-6 lg:grid-cols-2 auto-rows-fr">
+    <div className="grid auto-rows-fr gap-6 lg:grid-cols-2">
       {/* Form Card - Fixed height */}
-      <Card className="h-[650px] flex flex-col">
+      <Card className="flex h-[650px] flex-col">
         <CardHeader className="flex-shrink-0">
           <CardTitle>Crear nueva invitación</CardTitle>
           <CardDescription>
             Complete el formulario para generar un código QR de invitación
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col pb-0">
+        <CardContent className="flex flex-grow flex-col pb-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -264,8 +264,8 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
           {generatedInvite ? (
             <QRCodeDisplay invite={generatedInvite} />
           ) : (
-            <div className="w-full max-w-xs lg:h-[400px] border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/20">
-              <p className="text-muted-foreground text-center px-4">
+            <div className="bg-muted/20 flex w-full max-w-xs items-center justify-center rounded-lg border-2 border-dashed lg:h-[400px]">
+              <p className="text-muted-foreground px-4 text-center">
                 Su código QR aparecerá aquí después de generarlo
               </p>
             </div>
@@ -326,7 +326,7 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
       </Card>
 
       {/* QR Code Card */}
-      <Card className="hidden h-[650px] lg:flex flex-col">
+      <Card className="hidden h-[650px] flex-col lg:flex">
         <CardHeader className="flex-shrink-0">
           <CardTitle>
             {generatedInvite
@@ -339,12 +339,12 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
               : "Complete el formulario para generar una invitación"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow flex items-center justify-center py-8">
+        <CardContent className="flex flex-grow items-center justify-center py-8">
           {generatedInvite ? (
             <QRCodeDisplay invite={generatedInvite} />
           ) : (
-            <div className="w-full max-w-xs h-[400px] border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/20">
-              <p className="text-muted-foreground text-center px-4">
+            <div className="bg-muted/20 flex h-[400px] w-full max-w-xs items-center justify-center rounded-lg border-2 border-dashed">
+              <p className="text-muted-foreground px-4 text-center">
                 Su código QR aparecerá aquí después de generarlo
               </p>
             </div>
@@ -352,7 +352,7 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
         </CardContent>
         <CardFooter className="flex-shrink-0">
           {generatedInvite ? (
-            <div className="flex justify-between w-full">
+            <div className="flex w-full justify-between">
               <Button
                 variant="outline"
                 onClick={() => setGeneratedInvite(null)}
@@ -362,7 +362,7 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
               <Button onClick={handleSave}>Guardar</Button>
             </div>
           ) : (
-            <div className="w-full text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground w-full text-center text-sm">
               Genera un código QR para habilitar las opciones de compartir
             </div>
           )}

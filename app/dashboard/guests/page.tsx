@@ -28,8 +28,8 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-center my-6">
+    <main className="container mx-auto max-w-4xl p-4">
+      <h1 className="my-6 text-center text-3xl font-bold">
         Registro de invitados
       </h1>
 
