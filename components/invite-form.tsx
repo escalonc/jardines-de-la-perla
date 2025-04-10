@@ -261,15 +261,17 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
               </div>
             </form>
           </Form>
-          {generatedInvite ? (
-            <QRCodeDisplay invite={generatedInvite} />
-          ) : (
-            <div className="bg-muted/20 flex w-full max-w-xs items-center justify-center rounded-lg border-2 border-dashed lg:h-[400px]">
-              <p className="text-muted-foreground px-4 text-center">
-                Su código QR aparecerá aquí después de generarlo
-              </p>
-            </div>
-          )}
+          <div className="flex flex-grow items-center justify-center lg:hidden">
+            {generatedInvite ? (
+              <QRCodeDisplay invite={generatedInvite} />
+            ) : (
+              <div className="bg-muted/20 flex h-48 w-full max-w-xs items-center justify-center rounded-lg border-2 border-dashed">
+                <p className="text-muted-foreground px-4 text-center">
+                  Su código QR aparecerá aquí después de generarlo
+                </p>
+              </div>
+            )}
+          </div>
           {/* <form onSubmit={handleSubmit} className="h-full flex flex-col">
             <div className="space-y-4 lg:flex-grow">
               <div className="space-y-2">
