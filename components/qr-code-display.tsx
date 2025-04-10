@@ -3,22 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
-import { Share, Download, Copy } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Share } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface QRCodeDisplayProps {
   invite: Invite;
   compact?: boolean;
+  onShareSupported?: (supported: boolean) => void;
+  onImageBlobGenerated?: (blob: Blob) => void;
 }
 
-export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
+export function QRCodeDisplay({
+  invite,
+  compact = false,
+  onShareSupported,
+  onImageBlobGenerated,
+}: QRCodeDisplayProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [shareSupported, setShareSupported] = useState(false);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -28,12 +29,13 @@ export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
 
   // Check if Web Share API is supported
   useEffect(() => {
-    setShareSupported(
+    const supported =
       typeof navigator !== "undefined" &&
-        !!navigator.share &&
-        !!navigator.canShare
-    );
-  }, []);
+      !!navigator.share &&
+      !!navigator.canShare;
+    setShareSupported(supported);
+    onShareSupported?.(supported);
+  }, [onShareSupported]);
 
   useEffect(() => {
     if (!invite) return;
@@ -83,7 +85,10 @@ export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
 
         // Pre-generate the image blob for sharing/downloading
         generateImageBlob(url).then((blob) => {
-          if (blob) setImageBlob(blob);
+          if (blob) {
+            setImageBlob(blob);
+            onImageBlobGenerated?.(blob);
+          }
         });
       }
     );
@@ -153,96 +158,6 @@ export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
     }
   };
 
-  // Handle sharing via Web Share API
-  const handleShare = async () => {
-    if (!imageBlob) {
-      toast("Cannot share", {
-        description:
-          "There was an error preparing the image. Please try again.",
-      });
-      return;
-    }
-
-    try {
-      // Check if sharing is supported
-      if (shareSupported) {
-        // Try text-only sharing first (more compatible)
-        const shareData = {
-          title: `Invite for ${invite.name}`,
-          text: `QR code invite for ${invite.name}: ${invite.title}`,
-        };
-
-        // Check if we can share this data
-        if (navigator.canShare && navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          return;
-        }
-
-        // Try with file if text sharing isn't available
-        const fileShareData = {
-          title: `Invite for ${invite.name}`,
-          text: `QR code invite for ${invite.name}`,
-          files: [new File([imageBlob], "invite.png", { type: "image/png" })],
-        };
-
-        // Check if we can share with files
-        if (navigator.canShare && navigator.canShare(fileShareData)) {
-          await navigator.share(fileShareData);
-          return;
-        }
-      }
-
-      // If we get here, sharing isn't fully supported - fall back to download
-      downloadImage();
-    } catch (error) {
-      console.error("Error during share:", error);
-      // Fall back to download if sharing fails
-      downloadImage();
-    }
-  };
-
-  // Download the image
-  const downloadImage = () => {
-    if (!imageBlob) {
-      toast("Cannot download", {
-        description:
-          "There was an error preparing the image. Please try again.",
-      });
-      return;
-    }
-
-    const url = URL.createObjectURL(imageBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invite-${invite.name.toLowerCase().replace(/\s+/g, "-")}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast("Image downloaded", {
-      description: "The invite image has been downloaded to your device.",
-    });
-  };
-
-  // Copy the invite details to clipboard
-  const copyToClipboard = async () => {
-    const text = `Invitación para: ${invite.name}\nTitle: ${invite.title}\nguests: ${invite.guests}\nDetails: ${invite.description}`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      toast("Copied to clipboard", {
-        description: "Invite details copied to clipboard.",
-      });
-    } catch (error) {
-      console.error("Failed to copy:", error);
-      toast("Copy failed", {
-        description:
-          "Could not copy to clipboard. Your browser may not support this feature.",
-      });
-    }
-  };
-
   // For compact mode (used in mobile side-by-side view)
   if (compact) {
     return (
@@ -261,13 +176,13 @@ export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
           <canvas ref={canvasRef} />
         </div>
 
-        <Button
+        {/* <Button
           onClick={shareSupported ? handleShare : downloadImage}
           className="w-full h-7 text-xs"
         >
           <Share className="w-3 h-3 mr-1" />
           {shareSupported ? "Share" : "Download"}
-        </Button>
+        </Button> */}
       </div>
     );
   }
@@ -295,32 +210,6 @@ export function QRCodeDisplay({ invite, compact = false }: QRCodeDisplayProps) {
       <p className="text-xs text-center text-muted-foreground">
         {invite.description}
       </p>
-
-      {/* Dropdown menu for sharing options */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="w-full text-xs md:text-sm py-1 md:py-2 h-8 md:h-10">
-            <Share className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-            Compartir
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center">
-          {shareSupported && (
-            <DropdownMenuItem onClick={handleShare}>
-              <Share className="w-4 h-4 mr-2" />
-              Share
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={downloadImage}>
-            <Download className="w-4 h-4 mr-2" />
-            Download
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={copyToClipboard}>
-            <Copy className="w-4 h-4 mr-2" />
-            Copy Details
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   );
 }
