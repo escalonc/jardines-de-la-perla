@@ -1,31 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import QRCode from "qrcode";
-import { Button } from "@/components/ui/button";
-import { Share } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface QRCodeDisplayProps {
   invite: Invite;
-  compact?: boolean;
   onShareSupported?: (supported: boolean) => void;
   onImageBlobGenerated?: (blob: Blob) => void;
+  className?: string;
+  size?: number;
+  quality?: number;
+  format?: "png" | "jpeg" | "webp";
 }
 
 export function QRCodeDisplay({
   invite,
-  compact = false,
   onShareSupported,
   onImageBlobGenerated,
+  className,
+  size = 220,
+  quality = 0.92,
+  format = "png",
 }: QRCodeDisplayProps) {
-  const [qrDataUrl, setQrDataUrl] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [shareSupported, setShareSupported] = useState(false);
-  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   // Check if Web Share API is supported
   useEffect(() => {
@@ -33,181 +36,266 @@ export function QRCodeDisplay({
       typeof navigator !== "undefined" &&
       !!navigator.share &&
       !!navigator.canShare;
-    setShareSupported(supported);
     onShareSupported?.(supported);
   }, [onShareSupported]);
 
-  useEffect(() => {
-    if (!invite) return;
+  // Generate QR code with error handling
+  const generateQRCode = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    // Generate QR code data
-    const qrData = JSON.stringify({
-      id: invite.id,
-      name: invite.name,
-      guests: invite.guests,
-    });
+      const qrData = JSON.stringify({
+        id: invite.id,
+        name: invite.name,
+        guests: invite.guests,
+      });
 
-    // Determine QR code size based on compact mode and device
-    const qrSize = compact ? 120 : isMobile ? 150 : 200;
-
-    // Generate QR code on canvas
-    if (canvasRef.current) {
-      QRCode.toCanvas(
-        canvasRef.current,
-        qrData,
-        {
-          width: qrSize,
-          margin: 1,
+      // Generate QR code on canvas
+      if (canvasRef.current) {
+        await QRCode.toCanvas(canvasRef.current, qrData, {
+          width: size,
+          margin: 2,
           color: {
             dark: "#000000",
             light: "#ffffff",
           },
-        },
-        (error) => {
-          if (error) console.error(error);
-        },
-      );
-    }
-
-    // Generate QR code as data URL for sharing
-    QRCode.toDataURL(
-      qrData,
-      {
-        width: 200, // Keep this larger for sharing
-        margin: 1,
-      },
-      (err, url) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        setQrDataUrl(url);
-
-        // Pre-generate the image blob for sharing/downloading
-        generateImageBlob(url).then((blob) => {
-          if (blob) {
-            setImageBlob(blob);
-            onImageBlobGenerated?.(blob);
-          }
+          errorCorrectionLevel: "H",
         });
-      },
-    );
-  }, [invite, isMobile, compact]); // eslint-disable-line react-hooks/exhaustive-deps
+      }
 
-  // Generate the combined image with QR code and text
+      // Generate QR code as data URL
+      const url = await QRCode.toDataURL(qrData, {
+        width: size * 1.5,
+        margin: 2,
+        errorCorrectionLevel: "H",
+      });
+
+      await generateImageBlob(url);
+    } catch (err) {
+      const error =
+        err instanceof Error ? err : new Error("Failed to generate QR code");
+      setError(error);
+      toast.error(
+        "Error al generar el código QR. Por favor, intente nuevamente.",
+      );
+      console.error("QR generation error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [invite, size]);
+
+  useEffect(() => {
+    generateQRCode();
+    return () => {
+      // Cleanup canvas
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height,
+          );
+        }
+      }
+    };
+  }, [generateQRCode]);
+
   const generateImageBlob = async (qrUrl: string): Promise<Blob | null> => {
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) return null;
 
-      // Set canvas size - increased height
-      canvas.width = 300;
-      canvas.height = 450;
+      // Set canvas size with better proportions
+      canvas.width = 800;
+      canvas.height = 1000;
 
-      // Fill background
-      ctx.fillStyle = "#ffffff";
+      // Create gradient background
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+      gradient.addColorStop(0, "#f8fafc");
+      gradient.addColorStop(1, "#f1f5f9");
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw border
-      ctx.strokeStyle = "#e2e8f0";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      // Add a subtle pattern
+      ctx.fillStyle = "#ffffff15";
+      for (let i = 0; i < canvas.width; i += 20) {
+        for (let j = 0; j < canvas.height; j += 20) {
+          ctx.fillRect(i, j, 10, 10);
+        }
+      }
 
-      // Add title (now fixed as "Jardines de La Perla")
-      ctx.font = "bold 18px Arial";
-      ctx.fillStyle = "#000000";
+      // Draw main content container
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      roundRect(ctx, 50, 50, canvas.width - 100, canvas.height - 100, 30);
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+
+      // Add title
+      ctx.font = "bold 48px system-ui";
+      ctx.fillStyle = "#0f172a";
       ctx.textAlign = "center";
-      ctx.fillText(invite.title, canvas.width / 2, 40);
+      ctx.fillText(invite.title, canvas.width / 2, 150);
 
       // Add invitee name
-      ctx.font = "16px Arial";
-      ctx.fillText(`Para: ${invite.name}`, canvas.width / 2, 70);
+      ctx.font = "32px system-ui";
+      ctx.fillStyle = "#475569";
+      ctx.fillText(`Para: ${invite.name}`, canvas.width / 2, 220);
 
-      // Add guests
-      ctx.fillText(`Acompañantes: ${invite.guests}`, canvas.width / 2, 100);
+      // Add guests count
+      ctx.font = "28px system-ui";
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(`Acompañantes: ${invite.guests}`, canvas.width / 2, 270);
 
       // Draw QR code
       const qrImage = new Image();
       qrImage.crossOrigin = "anonymous";
       qrImage.src = qrUrl;
 
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
         qrImage.onload = resolve;
+        qrImage.onerror = reject;
       });
+
+      // Draw QR code background
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.05)";
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+      roundRect(ctx, canvas.width / 2 - 200, 320, 400, 400, 24);
+      ctx.fill();
+      ctx.shadowColor = "transparent";
 
       // Center QR code
       const qrX = (canvas.width - qrImage.width) / 2;
-      ctx.drawImage(qrImage, qrX, 130);
+      ctx.drawImage(qrImage, qrX, 370);
 
-      // Add description (now fixed as "invite code")
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "#4b5563";
-      ctx.fillText(invite.description || "", canvas.width / 2, 380); // Adjusted position
+      // Add description
+      ctx.font = "24px system-ui";
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(invite.description || "", canvas.width / 2, 820);
 
-      // Convert to blob
+      // Add decorative elements
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 - 150, 780);
+      ctx.lineTo(canvas.width / 2 + 150, 780);
+      ctx.stroke();
+
+      // Convert to blob with specified format and quality
       return new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Failed to generate image blob"));
-        }, "image/png");
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              onImageBlobGenerated?.(blob);
+              resolve(blob);
+            } else {
+              reject(new Error("Failed to generate image blob"));
+            }
+          },
+          `image/${format}`,
+          quality,
+        );
       });
     } catch (error) {
       console.error("Error generating image:", error);
+      toast.error("Error al generar la imagen. Por favor, intente nuevamente.");
       return null;
     }
   };
 
-  // For compact mode (used in mobile side-by-side view)
-  if (compact) {
+  // Helper function to draw rounded rectangles
+  const roundRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+  ) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
+  if (error) {
     return (
       <div
         ref={containerRef}
-        className="flex w-full flex-col items-center space-y-1 rounded-lg border bg-white p-2"
+        className={cn(
+          "mx-auto flex w-full max-w-md flex-col items-center space-y-2 rounded-xl border bg-gradient-to-b from-white to-gray-50/50 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] backdrop-blur-sm md:space-y-4",
+          className,
+        )}
+        role="alert"
+        aria-live="assertive"
       >
         <div className="text-center">
-          <p className="text-xs font-medium">For: {invite.name}</p>
-          <p className="text-muted-foreground text-xs">
-            Acompañantes: {invite.guests}
+          <h3 className="text-lg font-bold text-red-600">Error</h3>
+          <p className="text-muted-foreground">
+            No se pudo generar el código QR. Por favor, intente nuevamente.
           </p>
         </div>
-
-        <div className="rounded-md bg-white">
-          <canvas ref={canvasRef} />
-        </div>
-
-        {/* <Button
-          onClick={shareSupported ? handleShare : downloadImage}
-          className="w-full h-7 text-xs"
-        >
-          <Share className="w-3 h-3 mr-1" />
-          {shareSupported ? "Share" : "Download"}
-        </Button> */}
       </div>
     );
   }
 
-  // Standard display for desktop and non-compact views
   return (
     <div
       ref={containerRef}
-      className="mx-auto flex w-full max-w-xs flex-col items-center space-y-2 rounded-lg border bg-white p-3 md:space-y-4 md:p-4"
+      className={cn(
+        "mx-auto flex w-full max-w-md flex-col items-center space-y-2 rounded-xl border bg-gradient-to-b from-white to-gray-50/50 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] backdrop-blur-sm md:space-y-4",
+        className,
+      )}
+      role="region"
+      aria-label="Código QR de invitación"
     >
       <div className="text-center">
-        <h3 className="text-base font-bold md:text-lg">{invite.title}</h3>
-        <p className="text-muted-foreground text-xs md:text-sm">
+        <h3 className="text-lg font-bold tracking-tight text-gray-900 md:text-xl">
+          {invite.title}
+        </h3>
+        <p className="text-muted-foreground/80 text-sm font-medium md:text-base">
           Para: {invite.name}
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-muted-foreground/70 text-sm">
           Acompañantes: {invite.guests}
         </p>
       </div>
 
-      <div className="rounded-md bg-white p-1 md:p-2">
-        <canvas ref={canvasRef} />
+      <div
+        className="relative overflow-hidden rounded-lg bg-white p-1 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] md:p-5"
+        aria-busy={isLoading}
+      >
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-600" />
+          </div>
+        )}
+        <canvas ref={canvasRef} aria-label="Código QR" role="img" />
       </div>
 
-      <p className="text-muted-foreground text-center text-xs">
+      <p className="text-muted-foreground/60 text-center text-sm font-medium">
         {invite.description}
       </p>
     </div>
