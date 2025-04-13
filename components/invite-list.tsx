@@ -28,7 +28,7 @@ export function InviteList({ invites, onDelete }: InviteListProps) {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
       {invites.map((invite) => (
         <Card key={invite.id}>
           <CardHeader className="pb-2">
@@ -51,7 +51,7 @@ export function InviteList({ invites, onDelete }: InviteListProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <QRCodeDisplay invite={invite} />
+            <QRCodeDisplay invite={invite} compact size={180} />
           </CardContent>
         </Card>
       ))}

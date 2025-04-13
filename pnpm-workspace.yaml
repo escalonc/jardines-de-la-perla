@@ -1,3 +1,4 @@
 onlyBuiltDependencies:
-  - "@vercel/speed-insights"
+  - '@clerk/shared'
+  - '@vercel/speed-insights'
   - sharp

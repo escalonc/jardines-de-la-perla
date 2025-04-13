@@ -22,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { QRCodeDisplay } from "@/components/qr-code-display";
 import { generateUniqueId } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,17 +75,17 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [shareSupported, setShareSupported] = useState(false);
 
-  function clearForm() {
+  const clearForm = useCallback(() => {
     form.reset();
     setGeneratedInvite(null);
     setImageBlob(null);
     setShareSupported(false);
     form.setFocus("name");
-  }
+  }, [form]);
 
   useEffect(() => {
     clearForm();
-  }, []);
+  }, [clearForm]);
 
   // Memoized share support check
   const checkShareSupport = useCallback(async () => {
@@ -219,101 +218,106 @@ export function InviteForm({ onInviteCreated }: InviteFormProps) {
   };
 
   return (
-    <div className="grid auto-rows-fr gap-6">
+    <div>
       {/* Form Card */}
-      <Card className="flex flex-col">
-        <CardHeader className="flex-shrink-0">
-          <CardTitle>Crear nueva invitación</CardTitle>
-          <CardDescription>
-            Complete el formulario para generar un código QR de invitación
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-grow flex-col pb-0">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ingrese el nombre"
-                        {...field}
-                        aria-label="Nombre del invitado"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="guests"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de acompañantes</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="string"
-                        placeholder="Ingrese el número de acompañantes"
-                        {...field}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value, 10);
-                          return field.onChange(isNaN(value) ? 0 : value);
-                        }}
-                        aria-label="Número de acompañantes"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="isFrequent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Visitante frecuente</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        aria-label="Visitante frecuente"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generando...
-                    </>
-                  ) : (
-                    "Generar QR"
+      <div className="flex justify-center">
+        <Card className="w-full max-w-lg">
+          <CardHeader className="flex-shrink-0">
+            <CardTitle>Crear nueva invitación</CardTitle>
+            <CardDescription>
+              Complete el formulario para generar un código QR de invitación
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-grow flex-col pb-0">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ingrese el nombre"
+                          {...field}
+                          aria-label="Nombre del invitado"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={clearForm}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                />
+                <FormField
+                  control={form.control}
+                  name="guests"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número de acompañantes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="string"
+                          placeholder="Ingrese el número de acompañantes"
+                          {...field}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            return field.onChange(isNaN(value) ? 0 : value);
+                          }}
+                          aria-label="Número de acompañantes"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isFrequent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Visitante frecuente</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          aria-label="Visitante frecuente"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generando...
+                      </>
+                    ) : (
+                      "Generar QR"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={clearForm}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* QR Code Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
