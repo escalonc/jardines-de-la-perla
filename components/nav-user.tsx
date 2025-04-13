@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useClerk } from "@clerk/nextjs";
 
 export function NavUser({
   user,
@@ -28,8 +27,6 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const { signOut } = useClerk();
-
   const { isMobile } = useSidebar();
 
   const initials = user.name
@@ -80,7 +77,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+            <DropdownMenuItem onClick={() => {}}>
               <LogOut />
               Cerrar sesión
             </DropdownMenuItem>

@@ -14,14 +14,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useUser } from "@clerk/nextjs";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useUser();
-
-  const userEmail = user?.primaryEmailAddress?.emailAddress ?? "";
-  const userName = user?.fullName ?? "";
-  const userImage = user?.imageUrl ?? "";
+  const userEmail = "escalonchristopher@gmail.com";
+  const userName = "Christopher Escalon";
+  const userImage = "";
 
   const data: {
     user: {
