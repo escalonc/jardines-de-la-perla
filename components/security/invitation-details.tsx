@@ -89,9 +89,6 @@ export function InvitationDetails({ invitationId }: InvitationDetailsProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Detalles de la Invitación</CardTitle>
-      </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2">
           <div className="font-medium">Residente:</div>
